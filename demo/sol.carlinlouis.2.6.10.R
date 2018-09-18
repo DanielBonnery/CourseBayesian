@@ -58,7 +58,7 @@ graph2
   stan.model.text<-"data{
     int<lower = 0> n;
     real x[n];
-    real y[n];
+    real Y[n];
   }
   
   transformed data{
@@ -77,7 +77,7 @@ graph2
     for (i in 1:n) {
       mu[i] = beta0 + beta1*(logage[i] - mean(logage));
     }
-    y ~ normal(mu, sigma);
+    Y ~ normal(mu, sigma);
     beta0 ~ uniform(-100, 100);
     beta1 ~ uniform(-100, 100);
     sigma ~ uniform(0.01, 100);
@@ -92,7 +92,7 @@ graph2
       mu[i] = beta0 + beta1*(logage[i] - mean(logage));
     }
     for (i in 1:n) {
-      log_lik[i] = normal_lpdf(y[i] | mu[i], sigma);
+      log_lik[i] = normal_lpdf(Y[i] | mu[i], sigma);
     }
   }"
 
@@ -100,7 +100,7 @@ graph2
     
   library(rstan)
   stanfit = sampling(
-    stan_model(model_code=stan.model.text), 
+    stan_model(model_name="stan_model",model_code=stan.model.text), 
     data =   observed.data, 
     chains = 3, 
     cores =3,
@@ -110,11 +110,11 @@ graph2
   graph3<-ggplot(data.frame(ex$beta1), aes(x = ex$beta1)) + labs(x = expression(beta)) +
     geom_density(fill = "blue", alpha = 0.5) + 
     theme_bw()
-  
+  graph3
   graph4<-ggplot(data.frame(sqrt(ex$sigma)), aes(x = sqrt(ex$sigma))) + labs(x = expression(sigma)) +
     geom_density(fill = "darkolivegreen", color="brown", alpha = 0.44) + 
     theme_bw()
-  
+  graph4
   
   summary(stanfit)$summary
   
@@ -134,3 +134,4 @@ graph2
   loo.res = loo(log_lik, r_eff = r_eff, cores = 3)
   print(loo.res)
   ```
+  
