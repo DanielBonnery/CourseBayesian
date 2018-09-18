@@ -13,9 +13,7 @@ conf.int<-confint(model1)["log(dugong$x)",]
 conf.int
 #4.Bayesian computing
 #4.0 Part common to stan and jags
-observed.data<-list(n=dim(dugong)[1],
-     x=dugong$x,
-     Y=dugong$Y)
+observed.data<-c(list(n=dim(dugong)[1]),dugong)
 #4.1.Bayesian computations with jags
 library(R2jags)
 jags.model.text<-"model{
@@ -50,12 +48,12 @@ beta1.1<-jags.dugong$BUGSoutput$sims.list$beta1
 
 graph2<-ggplot(data.frame(beta1.1=beta1.1),aes(x=beta1.1))+geom_density()
 graph2
-  #4. Bayesian computations with stan
-  #This code is adapted from a solution by Soumojit Das
+#4. Bayesian computations with stan
+#This code is adapted from a solution by Soumojit Das
   
-  #We will first use classical approach and then move on to using Bayesian methods.
+#We will first use classical approach and then move on to using Bayesian methods.
   
-  stan.model.text<-"data{
+stan.model.text<-"data{
     int<lower = 0> n;
     real x[n];
     real Y[n];
@@ -133,5 +131,5 @@ graph2
   
   loo.res = loo(log_lik, r_eff = r_eff, cores = 3)
   print(loo.res)
-  ```
+
   
