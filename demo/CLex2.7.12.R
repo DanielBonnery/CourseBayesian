@@ -1,7 +1,7 @@
 #Code adapted from Carlin Louis Solution manual
 
 require(MASS)
-require(ggplo2)
+require(ggplot2)
 require(reshape2)
 model.text<-"
 model {
