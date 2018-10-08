@@ -3,27 +3,10 @@
 require(MASS)
 require(ggplot2)
 require(reshape2)
-model.text<-"
-model {
-for (i in 1:389) {
-Y ~ dnorm(mu[i], tau)
-mu[i] <- beta[1] + beta[2]*X[i,1] +
-beta[3]*X[i,2] + beta[4]*X[i,3]
-}
-for (i in 1:4) {
-beta[i] ~ dflat()
-}
-tau ~ dgamma(3,b)
-b <- 1/(1/(2*(1/(0.73*0.73))))
-sigma <- 1/sqrt(tau)
-}"
-
-## Inits (2 choices):
-list(beta = c(0,0,0,0), tau = 1.0)
-list(beta = c(0.5,0.5,0.5,0.5), tau = 4.0)
-list(beta = c(0.5,0.5,0.5,0.5), tau = 4.0)
-
+require(R2jags)
+# Download data
 land.data <- dataDownloadCarlinLouis::ddCL_land()
+# Compute linear model estimators
 lm1<-lm(Y~X1+X2+X3,data=land.data)
 slm1<-summary(lm1)
 s.sq<-slm1$sigma^2
@@ -33,12 +16,50 @@ tXX.inv<-solve(t(X)%*%X)
 beta.hat<-lm1$coefficients
 niter=5000
 Y<-land.data$Y
+N<-nrow(land.data)
+
+#
+
+
+model.text<-"
+model {
+for (i in 1:N) {
+Y[i]~dnorm(mu[i], tau)
+mu[i] <- beta[1] + beta[2]*X[i,2] + beta[3]*X[i,3] + beta[4]*X[i,4]
+}
+for (i in 1:4) {
+beta[i]~dunif(-10^9, 10^9)
+}
+tau~dgamma(3,b)
+b <- 2/(sigma2start)
+sigma <- 1/sqrt(tau)
+}"
+init.values=list(
+list(beta = c(0,0,0,0), tau = 1.0),
+list(beta = c(0.5,0.5,0.5,0.5), tau = 4.0),
+list(beta = c(0.5,0.5,0.5,0.5), tau = 4.0))
+
+model.data=list(Y=land.data$Y,X=X,N=N,sigma2start=s.sq)
+
+
+jags.fit <- jags(
+  model.file= textConnection (model.text),
+  data=model.data ,
+  inits=init.values ,
+  parameters.to.save = c("sigma"),
+  n.chains =3,
+  n.iter =1002)
+
+
 land.samples <- plyr::raply(.n = niter,(function(){
   rsigma.sq <- 1/rgamma(1, dfs[2]/2, dfs[2]*s.sq/2)
   rsigma.sq.of.beta <- (tXX.inv) * rsigma.sq
   rbeta <- MASS::mvrnorm(1, beta.hat, rsigma.sq.of.beta)
   c(rbeta,sqrt(rsigma.sq))}),.progress="text")
 colnames(land.samples)<-c(paste0("beta",1:4),"sigma")
+
+
+
 
 # Function to compile summary statistics
 sumstats <- function(vector){
