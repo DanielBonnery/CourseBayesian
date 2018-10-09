@@ -1,5 +1,8 @@
-data(dugong,package="dataMisc")
 library(ggplot2)
+library(rstan)
+library(rjags)
+
+data(dugong,package="dataMisc")
 #1. Print
 graph1<-ggplot(data=dugong,aes(x=log(x),y=Y))+geom_point()
 graph1
@@ -96,7 +99,6 @@ stan.model.text<-"data{
 
 #  We use R to draw samples and inference for the given problem
     
-  library(rstan)
   stanfit = sampling(
     stan_model(model_name="stan_model",model_code=stan.model.text), 
     data =   observed.data, 
@@ -104,7 +106,7 @@ stan.model.text<-"data{
     cores =3,
     iter = 3000, warmup = 1000)
   
-  ex = extract(stanfit)
+  ex = rstan::extract(stanfit)
   graph3<-ggplot(data.frame(ex$beta1), aes(x = ex$beta1)) + labs(x = expression(beta)) +
     geom_density(fill = "blue", alpha = 0.5) + 
     theme_bw()
