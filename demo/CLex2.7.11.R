@@ -142,6 +142,6 @@ aspirin_b <-
   graph5<-ggplot(data.frame(X,Z=c(Z[-13],est_e),Predicted=rep(c("Observed","Predicted"),c(12,1))),aes(X,Z,color=Predicted))+
     geom_point()+
     stat_function(fun=function(xx){means$beta0+means$beta1*(xx-mean(X))+means$beta2*(xx-mean(X))^2}, geom="line", aes(color="Posterior mean of Z|X")) +
-    scale_colour_manual("Prediction", values=c("black","red","blue"))
+    scale_colour_manual("", values=c("black","red","blue"))
   
   graph5
