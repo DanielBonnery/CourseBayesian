@@ -1,4 +1,5 @@
 require("R2jags")
+library(ggplot2)
 data(baseball,package="dataBaseball")
 tmpfile=tempfile()
 modelfile<-function(i){
@@ -64,13 +65,8 @@ names(jags.fit2)<-paste0("model ",1:3)
 DIC2<-sapply(jags.fit2,function(l){l$BUGSoutput$DIC})
 i<-(1:3)[DIC2==min(DIC2)]
 samplejags<-jags.fit2[[i]]$BUGSoutput$sims.list$sigma2
-ex4solgraph1.texte='histogram( ~ samplejags ,
-xlab = "$\\\\sigma^2$", 
-type = "density",nint=40,
-panel = function(x, ...) {
-panel.histogram(x, ...,col="gray")
-panel.densityplot(x,plot.points=FALSE)})'
-eval(parse(text=texte))
+graph1<-ggplot(data=data.frame(x=samplejags[,1]),aes(x=x))+geom_histogram()+geom_density()+xlab(expression(sigma^2))
+
 p.b2<-signif(jags.fit2[[i]]$BUGSoutput$summary[paste0("p[",1:N,"]"),c("mean")],4)
 
 L=list(baseball$p,p.b1,p.b2,baseball$p.hat)
@@ -97,3 +93,4 @@ histogram( ~ samplejags ,
            panel = function(x, ...) {
              panel.histogram(x, ...,col="gray")
              panel.densityplot(x,plot.points=FALSE)})
+
