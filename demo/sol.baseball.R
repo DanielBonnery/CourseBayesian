@@ -69,7 +69,7 @@ graph1<-ggplot(data=data.frame(x=samplejags[,1]),aes(x=x))+geom_histogram()+geom
 
 p.b2<-signif(jags.fit2[[i]]$BUGSoutput$summary[paste0("p[",1:N,"]"),c("mean")],4)
 
-L=list(baseball$p,p.b1,p.b2,baseball$p.hat)
+L=list(baseball$P,p.b1,p.b2,baseball$hat.P)
 plot(c(1,N),range(unlist(L)),type="n")
 lapply(1:4,function(l){points(1:N,L[[l]],col=l,pch=20)})
 ex4solgraph2.texte<-"par(oma=c(2,0,0,0),mar=c(0,3,0,0),mgp=c(4,1,0))
